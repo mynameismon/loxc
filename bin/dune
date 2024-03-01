@@ -1,0 +1,4 @@
+(executable
+ (public_name loxc)
+ (name main)
+ (libraries loxc))
