@@ -8,9 +8,9 @@ let rec repl () =
     print_endline input;
     repl ()  (* Loop back to read the next input *)
   with
-  | End_of_file -> print_endline "Exiting REPL";
+  | End_of_file -> exit 65;
   | exn -> 
-    print_endline ("Error: " ^ Printexc.to_string exn);;
+    print_endline ("Error: " ^ Printexc.to_string exn); exit 65;;
 
 let main () =
   match Sys.argv with
