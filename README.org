@@ -1,0 +1,14 @@
+#+TITLE: Crafting Interpreters
+
+Following the excellent [[https://craftinginterpreters.com/][Crafting Interpreters]] book, this is an attempt to write a Lox interpreter in OCaML.
+
+** Some goals
+- Strong typing, or atleast, an attempt at hybrid typing, so I can use this to learn typing and type inference.
+- Compile it instead of interpreting it
+- Add optimisations
+- Constant time operations to make it nice for cryptography?
+
+** Resources
+1. [[https://craftinginterpreters.com/the-lox-language.html][Lox Language Reference]]
+2. [[https://github.com/DavidTimms/loxdown][Loxdown]], a strongly typed variant of Lox
+3. [[https://github.com/miDeb/loxjit][LoxJIT]], a compiled version of Lox
