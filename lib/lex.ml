@@ -9,12 +9,13 @@ type context = {
     tokens: Tokens.token list;
   }
 
-let add_token context token =
+let add_token ?(current = 1) context token =
   {line = context.line;
-   current = context.current + 1;
+   current = context.current + current;
    start = context.current;
    tokens = {kind = token;
-             line_number = context.line} :: context.tokens}
+             line_no = context.line;
+             col = context.current} :: context.tokens}
 
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)

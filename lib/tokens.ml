@@ -44,7 +44,8 @@ type token_type =
 
 type token = {
     kind: (token_type, string) result;
-    line_number: int;
+    line_no: int;
+    col: int;
   }
 
 let token_name token =
@@ -131,7 +132,7 @@ let token_to_string token =
   | Identifier idf -> idf
 
 let print_token tok =
-  Printf.sprintf "(Line %d: %s)" tok.line_number
+  Printf.sprintf "(Line %d, Col %d: %s)" tok.line_no tok.col
     (match tok.kind with
      | Ok token -> (token_name token) ^ " " ^ (token_to_string token)
      | Error err_str -> err_str)
