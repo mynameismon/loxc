@@ -1,33 +1,52 @@
-type position = {
+open Tokens
+
+type 'a result = Ok of 'a | Error of string
+
+type context = {
     line: int;
     current: int;
     start: int;
-}
+    tokens: Tokens.token list;
+  }
+
+let add_token context token =
+  {line = context.line;
+   current = context.current + 1;
+   start = context.current;
+   tokens = {kind = token;
+             line_number = context.line} :: context.tokens}
 
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)
-let rec scan_token remaining processed =
+let rec scan_token remaining context =
   match remaining with
-  | [] -> processed
-  | '\n' :: t -> scan_token t processed
-  | '*' :: t -> scan_token t ((Ok Tokens.Star) :: processed)
-  | '+' :: t -> scan_token t ((Ok Tokens.Plus) :: processed)
-  | h :: t -> scan_token t ((Error (Printf.sprintf "Unknown token %c" h)) :: processed)
+  | [] -> context
+  | '*' :: t -> scan_token t (add_token context (Ok Tokens.Star))
+  | '+' :: t -> scan_token t (add_token context (Ok Tokens.Plus))
+  | '-' :: t -> scan_token t (add_token context (Ok Tokens.Minus))
+  | '{' :: t -> scan_token t (add_token context (Ok Tokens.LeftBrace))
+  | '}' :: t -> scan_token t (add_token context (Ok Tokens.RightBrace))
+  | '(' :: t -> scan_token t (add_token context (Ok Tokens.LeftParen))
+  | ')' :: t -> scan_token t (add_token context (Ok Tokens.RightParen))
+  | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 
 let string_to_list s =
   s |> String.to_seq |> List.of_seq
 
-let scan_tokens program = scan_token (string_to_list program) [] |> List.rev
 
+let init_context = {line = 1;
+                    current = 0;
+                    start = 0;
+                    tokens = []}
+let scan_tokens program = (scan_token (string_to_list program) init_context).tokens |> List.rev
+
+let rec print_tree_internal token_list output = 
+  match token_list with
+  | [] -> output
+  | h :: t -> print_tree_internal t (output ^ Printf.sprintf "(Line %d: %s)\n" h.line_number
+                                                (match h.kind with
+                                                 | Ok token -> (Tokens.token_to_string token)
+                                                 | Error err_str -> err_str))
 let print_tree token_list =
-  let rec print_tree_internal token_list output = 
-    match token_list with
-    | [] -> output
-    | h :: t ->
-       match h with
-       | Ok token -> print_tree_internal t (output ^ (Printf.sprintf "(%s)\n" (Tokens.token_to_string token)))
-       | Error err_str -> print_tree_internal t (output ^ (Printf.sprintf "(Error: %s)\n" err_str)) in
   print_tree_internal token_list ""
-
-

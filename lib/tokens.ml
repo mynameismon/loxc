@@ -43,9 +43,8 @@ type token_type =
   | Identifier of string
 
 type token = {
-    kind: token_type;
+    kind: (token_type, string) result;
     line_number: int;
-    column: int
   }
 
 let token_to_string token =
