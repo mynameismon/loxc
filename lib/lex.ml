@@ -37,8 +37,8 @@ let string_to_list s =
 
 
 let init_context = {line = 1;
-                    current = 0;
-                    start = 0;
+                    current = 1;
+                    start = 1;
                     tokens = []}
 let scan_tokens program = (scan_token (string_to_list program) init_context).tokens |> List.rev
 
