@@ -44,9 +44,7 @@ let scan_tokens program = (scan_token (string_to_list program) init_context).tok
 let rec print_tree_internal token_list output = 
   match token_list with
   | [] -> output
-  | h :: t -> print_tree_internal t (output ^ Printf.sprintf "(Line %d: %s)\n" h.line_number
-                                                (match h.kind with
-                                                 | Ok token -> (Tokens.token_to_string token)
-                                                 | Error err_str -> err_str))
+  | h :: t -> print_tree_internal t ((Tokens.print_token h) :: output)
+
 let print_tree token_list =
-  print_tree_internal token_list ""
+  print_tree_internal token_list [] |> String.concat "\n"

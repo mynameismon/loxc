@@ -47,6 +47,48 @@ type token = {
     line_number: int;
   }
 
+let token_name token =
+  match token with
+  | LeftParen -> "LeftParen"
+  | RightParen -> "RightParen"
+  | LeftBrace -> "LeftBrace"
+  | RightBrace -> "RightBrace"
+  | Comma -> "Comma"
+  | Dot -> "Dot"
+  | Plus -> "Plus"
+  | Minus -> "Minus"
+  | Star -> "Star"
+  | Slash -> "Slash"
+  | Semicolon -> "Semicolon"
+  | Bang -> "Bang"
+  | BangEqual -> "BangEqual"
+  | Equal -> "Equal"
+  | EqualEqual -> "EqualEqual"
+  | Greater -> "Greater"
+  | GreaterEqual -> "GreaterEqual"
+  | Less -> "Less"
+  | LessEqual -> "LessEqual"
+  | And -> "And"
+  | Class -> "Class"
+  | Else -> "Else"
+  | False -> "False"
+  | Fun -> "Fun"
+  | For -> "For"
+  | If -> "If"
+  | Nil -> "Nil"
+  | Or -> "Or"
+  | Print -> "Print"
+  | Return -> "Return"
+  | Super -> "Super"
+  | This -> "This"
+  | True -> "True"
+  | Var -> "Var"
+  | While -> "While"
+  | String _ -> "String"
+  | Number _ -> "Number"
+  | Identifier _ -> "Identifier"
+
+
 let token_to_string token =
   match token with 
   | LeftParen -> "("
@@ -86,4 +128,10 @@ let token_to_string token =
   | While -> "while"
   | String str -> Printf.sprintf "\"%s\"" str
   | Number num -> Float.to_string num
-  | Identifier idf -> idf;
+  | Identifier idf -> idf
+
+let print_token tok =
+  Printf.sprintf "(Line %d: %s)" tok.line_number
+    (match tok.kind with
+     | Ok token -> (token_name token) ^ " " ^ (token_to_string token)
+     | Error err_str -> err_str)
