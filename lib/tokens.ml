@@ -14,6 +14,7 @@ type token_type =
   | Star
   | Slash
   | Semicolon
+  | Colon
   | Bang
   | BangEqual
   | Equal
@@ -61,6 +62,7 @@ let token_name token =
   | Star -> "Star"
   | Slash -> "Slash"
   | Semicolon -> "Semicolon"
+  | Colon -> "Colon"
   | Bang -> "Bang"
   | BangEqual -> "BangEqual"
   | Equal -> "Equal"
@@ -103,6 +105,7 @@ let token_to_string token =
   | Star -> "*"
   | Slash -> "/"
   | Semicolon -> ";"
+  | Colon -> ":"
   | Bang -> "!"
   | BangEqual -> "!="
   | Equal -> "="

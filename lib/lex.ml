@@ -49,6 +49,7 @@ let rec scan_token remaining context =
   | '/' :: '/' :: t -> scan_token (lex_comments t)
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
   | '/' :: t -> scan_token t (add_token context (Ok Tokens.Slash))
+  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 
@@ -60,7 +61,7 @@ let init_context = {line = 1;
                     current = 1;
                     start = 1;
                     tokens = []}
-let scan_tokens program = (scan_token (string_to_list program) init_context).tokens |> List.rev
+let scan_tokens program = (scan_token (string_to_list program) init_context).tokens
 
 let rec print_tree_internal token_list output = 
   match token_list with
