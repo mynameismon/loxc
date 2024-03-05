@@ -1,5 +1,14 @@
-let read_whole_file _filename =
-  failwith "function not implemented";;
+let read_lines filename =
+  let f = open_in filename in
+  let rec loop () =
+    try
+      let next = input_line f in
+      next :: loop ()
+    with End_of_file ->
+      close_in f;
+      []
+  in loop ()
+
 
 let rec repl () =
   print_string "loxc> ";
@@ -12,18 +21,18 @@ let rec repl () =
   | End_of_file -> exit 65;
   | exn -> 
      print_endline ("Error: " ^ Printexc.to_string exn); exit 65
-and eval input = Loxc.run input |> Printf.sprintf "%s" ;;
+and eval input = Loxc.run input ;;
 
 let main () =
   match Sys.argv with
-  | [| _; "run"; filename |] -> filename |> read_whole_file |> Loxc.run |> Printf.printf "%s"
+  | [| _; "run"; filename |] -> read_lines filename |> String.concat "\n" |> Loxc.run |> print_endline
   | [| _; "repl" |] -> repl()
   | [| _; "help" |] | _ ->  Printf.printf
  "loxc [run filename | repl | help]\n\
  \n\
- run\t  Reads and runs file\n\
- repl\t Opens an interative replace\n\
- help\t Prints this message\n";;
+ run\tReads and runs file\n\
+ repl\tOpens an interative replace\n\
+ help\tPrints this message\n";;
 
 let () =
   main()
