@@ -76,7 +76,7 @@ let rec scan_token remaining context =
   | '"' :: t -> let result = (scan_string [] t context) in
                 (match result with
                  | tokens, context -> scan_token tokens context)
-  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
+  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Colon)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 
