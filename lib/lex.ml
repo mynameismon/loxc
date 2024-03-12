@@ -17,11 +17,35 @@ let add_token ?(current = 1) context token =
              line_no = context.line;
              col = context.current} :: context.tokens}
 
-let rec  lex_comments chars =
+let rec lex_comments chars =
   match chars with
   | [] -> chars
   | '\n' :: _ -> chars
   | _ :: t -> lex_comments t
+
+(* Note: Multiline strings are not allowed because I am too lazy to figure out how to make  *)
+let rec scan_string curr_str chars context =
+  match chars with
+  | [] -> [], {context with current = context.current + 1;
+                        start = context.current;
+                        tokens = {
+                            kind = Error "String not closed!";
+                            line_no = context.line;
+                            col = context.current;} :: context.tokens}
+  | '\n' :: t -> t, {line = context.line + 1;
+                      current = 1;
+                      start = 1;
+                      tokens = {
+                          kind = Error "String not closed!";
+                          line_no = context.line;
+                          col = context.current;} :: context.tokens}
+  | '"' :: t -> t, {context with current = context.current + 1;
+                        start = context.current;
+                        tokens = {
+                            kind = Ok (Tokens.String (curr_str |> List.rev |> List.to_seq |> String.of_seq));
+                            line_no = context.line;
+                            col = context.current;} :: context.tokens}
+  | c :: t -> scan_string (c :: curr_str) t {context with current = context.current + 1}
 
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)
@@ -49,6 +73,9 @@ let rec scan_token remaining context =
   | '/' :: '/' :: t -> scan_token (lex_comments t)
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
   | '/' :: t -> scan_token t (add_token context (Ok Tokens.Slash))
+  | '"' :: t -> let result = (scan_string [] t context) in
+                (match result with
+                 | tokens, context -> scan_token tokens context)
   | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
