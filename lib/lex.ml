@@ -17,6 +17,27 @@ let add_token ?(current = 1) context token =
              line_no = context.line;
              col = context.current} :: context.tokens}
 
+
+(* Idea: Match as many numbers as one can. Once that is done, check if
+   a period (.) is encountered. If yes, try to match as many numbers
+   after that as possible. If we do not have a digit after that, we concede
+   defeat and raise an error message. Else we have successful floating
+   point number!*)
+let scan_num chars context =
+  let rec scan_int curr_str chars context =
+    match chars with
+    | '0'..'9' as num :: t -> scan_int (num :: curr_str) t {context with current = context.current + 1;}
+    | _  ->  curr_str, chars, context in
+  let pre, rem, context = scan_int [] chars context in
+  let post, rem, context = match rem with
+    | '.' :: '0'..'9':: t -> scan_int ('.' :: pre) t {context with current = context.current + 1;}
+    | _ -> pre, rem, context in
+  let token = match post with
+    | '.' :: _ -> Error "Number ends with .!"
+    | _ -> Ok (Tokens.Number (Float.of_string (char_to_string post))) in
+  let token_len = context.current - context.start in
+  rem, (add_token ~current:token_len context token)
+
 let rec lex_comments chars =
   match chars with
   | [] -> chars
@@ -73,11 +94,8 @@ let rec scan_token remaining context =
   | '/' :: '/' :: t -> scan_token (lex_comments t)
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
   | '/' :: t -> scan_token t (add_token context (Ok Tokens.Slash))
-  | '"' :: t -> let result = (scan_string [] t context) in
-                (match result with
-                 | tokens, context -> scan_token tokens context)
-  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Colon)) (* Lox Extension: Lexing for type checking *)
   | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
+  | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
   | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
