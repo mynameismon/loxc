@@ -1,7 +1,5 @@
 open Tokens
 
-type 'a result = Ok of 'a | Error of string
-
 type context = {
     line: int;
     current: int;
