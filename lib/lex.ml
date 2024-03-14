@@ -7,6 +7,8 @@ type context = {
     tokens: Tokens.token list;
   }
 
+let char_to_string chars = chars |> List.rev |> List.to_seq |> String.of_seq
+
 let add_token ?(current = 1) context token =
   {line = context.line;
    current = context.current + current;
@@ -40,7 +42,7 @@ let rec scan_string curr_str chars context =
   | '"' :: t -> t, {context with current = context.current + 1;
                         start = context.current;
                         tokens = {
-                            kind = Ok (Tokens.String (curr_str |> List.rev |> List.to_seq |> String.of_seq));
+                            kind = Ok (Tokens.String (char_to_string curr_str));
                             line_no = context.line;
                             col = context.current;} :: context.tokens}
   | c :: t -> scan_string (c :: curr_str) t {context with current = context.current + 1}
@@ -75,6 +77,8 @@ let rec scan_token remaining context =
                 (match result with
                  | tokens, context -> scan_token tokens context)
   | ':' :: t -> scan_token t (add_token context (Ok Tokens.Colon)) (* Lox Extension: Lexing for type checking *)
+  | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
+  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 
