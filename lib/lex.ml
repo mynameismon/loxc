@@ -68,6 +68,15 @@ let rec scan_string curr_str chars context =
                             col = context.current;} :: context.tokens}
   | c :: t -> scan_string (c :: curr_str) t {context with current = context.current + 1}
 
+let scan_identifier chars context =
+  let rec scan_word curr_str chars context = 
+  match chars with
+  | 'A'..'Z' | 'a'..'z' | '_' | '0'..'9' as h :: t -> scan_word (h :: curr_str) t {context with current = context.current + 1}
+  | _ :: _ -> (char_to_string curr_str), chars, context
+  | [] -> (char_to_string curr_str), chars, context in
+  let identifier, chars, context = scan_word [] chars context in
+  chars, (add_token context (Ok (match_keyword identifier)))
+
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)
 let rec scan_token remaining context =
@@ -96,13 +105,13 @@ let rec scan_token remaining context =
   | '/' :: t -> scan_token t (add_token context (Ok Tokens.Slash))
   | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
   | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
+  | 'a'..'z' :: _ | 'A'..'Z' :: _ | '_' :: _ -> let tokens, context = (scan_identifier remaining context) in scan_token tokens context
   | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 
 let string_to_list s =
   s |> String.to_seq |> List.of_seq
-
 
 let init_context = {line = 1;
                     current = 1;

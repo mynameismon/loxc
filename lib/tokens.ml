@@ -49,6 +49,26 @@ type token = {
     col: int;
   }
 
+let match_keyword identifier =
+  match identifier with
+  | "and" -> And
+  | "class" -> Class
+  | "else" -> Else
+  | "false" -> False
+  | "for" -> For
+  | "fun" -> Fun
+  | "if" -> If
+  | "nil" -> Nil
+  | "or" -> Or
+  | "print" -> Print
+  | "return" -> Return
+  | "super" -> Super
+  | "this" -> This
+  | "true" -> True
+  | "var" -> Var
+  | "while" -> While
+  | _ -> Identifier identifier
+
 let token_name token =
   match token with
   | LeftParen -> "LeftParen"
