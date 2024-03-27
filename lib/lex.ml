@@ -117,7 +117,7 @@ let init_context = {line = 1;
                     current = 1;
                     start = 1;
                     tokens = []}
-let scan_tokens program = (scan_token (string_to_list program) init_context).tokens
+let scan_tokens program = List.rev ((scan_token (string_to_list program) init_context).tokens)
 
 let rec print_tree_internal token_list output = 
   match token_list with
@@ -125,4 +125,4 @@ let rec print_tree_internal token_list output =
   | h :: t -> print_tree_internal t ((Tokens.print_token h) :: output)
 
 let print_tree token_list =
-  print_tree_internal token_list [] |> String.concat "\n"
+  print_tree_internal (List.rev token_list) [] |> String.concat "\n"
