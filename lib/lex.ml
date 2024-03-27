@@ -34,7 +34,7 @@ let scan_num chars context =
     | _ -> pre, rem, context in
   let token = match post with
     | '.' :: _ -> Error "Number ends with .!"
-    | _ -> Ok (Tokens.Number (Float.of_string (char_to_string post))) in
+    | _ -> (Tokens.Number (Float.of_string (char_to_string post))) in
   let token_len = context.current - context.start in
   rem, (add_token ~current:token_len context token)
 
@@ -63,7 +63,7 @@ let rec scan_string curr_str chars context =
   | '"' :: t -> t, {context with current = context.current + 1;
                         start = context.current;
                         tokens = {
-                            kind = Ok (Tokens.String (char_to_string curr_str));
+                            kind = (Tokens.String (char_to_string curr_str));
                             line_no = context.line;
                             col = context.current;} :: context.tokens}
   | c :: t -> scan_string (c :: curr_str) t {context with current = context.current + 1}
@@ -75,7 +75,7 @@ let scan_identifier chars context =
   | _ :: _ -> (char_to_string curr_str), chars, context
   | [] -> (char_to_string curr_str), chars, context in
   let identifier, chars, context = scan_word [] chars context in
-  chars, (add_token context (Ok (match_keyword identifier)))
+  chars, (add_token context (match_keyword identifier))
 
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)
@@ -85,28 +85,28 @@ let rec scan_token remaining context =
   | '\n' :: t -> scan_token t {context with line = context.line + 1; start = 1; current = 1}
   | ' ' :: t | '\t' :: t | '\r' :: t -> scan_token t
                                            {context with start = context.current;  current = context.current + 1}
-  | '*' :: t -> scan_token t (add_token context (Ok Tokens.Star))
-  | '+' :: t -> scan_token t (add_token context (Ok Tokens.Plus))
-  | '-' :: t -> scan_token t (add_token context (Ok Tokens.Minus))
-  | '{' :: t -> scan_token t (add_token context (Ok Tokens.LeftBrace))
-  | '}' :: t -> scan_token t (add_token context (Ok Tokens.RightBrace))
-  | '(' :: t -> scan_token t (add_token context (Ok Tokens.LeftParen))
-  | ')' :: t -> scan_token t (add_token context (Ok Tokens.RightParen))
-  | '!' :: '=' :: t -> scan_token t (add_token  ~current:2 context (Ok Tokens.BangEqual))
-  | '!' :: t -> scan_token t (add_token context (Ok Tokens.Bang))
-  | '=' :: '=' :: t -> scan_token t (add_token  ~current:2 context (Ok Tokens.EqualEqual))
-  | '=' :: t -> scan_token t (add_token context (Ok Tokens.Equal))
-  | '>' :: '=' :: t -> scan_token t (add_token  ~current:2 context (Ok Tokens.GreaterEqual))
-  | '>' :: t -> scan_token t (add_token context (Ok Tokens.Greater))
-  | '<' :: '=' :: t -> scan_token t (add_token  ~current:2 context (Ok Tokens.LessEqual))
-  | '<' :: t -> scan_token t (add_token context (Ok Tokens.Less))
+  | '*' :: t -> scan_token t (add_token context Tokens.Star)
+  | '+' :: t -> scan_token t (add_token context Tokens.Plus)
+  | '-' :: t -> scan_token t (add_token context Tokens.Minus)
+  | '{' :: t -> scan_token t (add_token context Tokens.LeftBrace)
+  | '}' :: t -> scan_token t (add_token context Tokens.RightBrace)
+  | '(' :: t -> scan_token t (add_token context Tokens.LeftParen)
+  | ')' :: t -> scan_token t (add_token context Tokens.RightParen)
+  | '!' :: '=' :: t -> scan_token t (add_token  ~current:2 context Tokens.BangEqual)
+  | '!' :: t -> scan_token t (add_token context Tokens.Bang)
+  | '=' :: '=' :: t -> scan_token t (add_token  ~current:2 context Tokens.EqualEqual)
+  | '=' :: t -> scan_token t (add_token context Tokens.Equal)
+  | '>' :: '=' :: t -> scan_token t (add_token  ~current:2 context Tokens.GreaterEqual)
+  | '>' :: t -> scan_token t (add_token context Tokens.Greater)
+  | '<' :: '=' :: t -> scan_token t (add_token  ~current:2 context Tokens.LessEqual)
+  | '<' :: t -> scan_token t (add_token context Tokens.Less)
   | '/' :: '/' :: t -> scan_token (lex_comments t)
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
-  | '/' :: t -> scan_token t (add_token context (Ok Tokens.Slash))
+  | '/' :: t -> scan_token t (add_token context Tokens.Slash)
   | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
   | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
   | 'a'..'z' :: _ | 'A'..'Z' :: _ | '_' :: _ -> let tokens, context = (scan_identifier remaining context) in scan_token tokens context
-  | ':' :: t -> scan_token t (add_token context (Ok Tokens.Slash)) (* Lox Extension: Lexing for type checking *)
+  | ':' :: t -> scan_token t (add_token context Tokens.Colon) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
 
 

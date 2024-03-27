@@ -42,9 +42,10 @@ type token_type =
   | String of string
   | Number of float
   | Identifier of string
+  | Error of string
 
 type token = {
-    kind: (token_type, string) result;
+    kind: token_type;
     line_no: int;
     col: int;
   }
@@ -110,6 +111,7 @@ let token_name token =
   | String _ -> "String"
   | Number _ -> "Number"
   | Identifier _ -> "Identifier"
+  | Error _ -> "Error"
 
 
 let token_to_string token =
@@ -153,9 +155,7 @@ let token_to_string token =
   | String str -> Printf.sprintf "\"%s\"" str
   | Number num -> Float.to_string num
   | Identifier idf -> idf
+  | Error str -> str
 
 let print_token tok =
-  Printf.sprintf "(Line %d, Col %d: %s)" tok.line_no tok.col
-    (match tok.kind with
-     | Ok token -> (token_name token) ^ " " ^ (token_to_string token)
-     | Error err_str -> err_str)
+  Printf.sprintf "(Line %d, Col %d: %s %s)" tok.line_no tok.col (token_name tok.kind) (token_to_string tok.kind)
