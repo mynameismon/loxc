@@ -5,6 +5,7 @@ let rec primary tokens =
   match tokens with
   | { kind = Tokens.True; _ } :: rest -> (Literal(Bool(true)), rest)
   | { kind = Tokens.False; _ } :: rest -> (Literal(Bool(false)), rest)
+  | { kind = Tokens.Number num; _ } :: rest -> (Literal(Number(num)), rest)
   | _ :: rest -> (Error("Unhandled token"), rest)
   | [] -> Literal(Nil), []
 
