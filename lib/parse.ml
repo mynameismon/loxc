@@ -50,4 +50,8 @@ and equality tokens =
 
 and expression tokens = equality tokens
 
-let parse tokens = expression tokens
+let extract_first f _ = f
+
+let parse tokens =
+  let ast, _ = expression tokens in
+  ast
