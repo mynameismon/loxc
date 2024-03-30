@@ -7,6 +7,7 @@ let rec primary tokens =
   | { kind = Tokens.False; _ } :: rest -> (Literal(Bool(false)), rest)
   | { kind = Tokens.Number num; _ } :: rest -> (Literal(Number(num)), rest)
   | { kind = Tokens.Nil; _ } :: rest -> (Literal(Nil), rest)
+  | { kind = Tokens.String str; _ } :: rest -> (Literal(String(str)), rest)
   | _ :: rest -> (Error("Unhandled token"), rest)
   | [] -> Literal(Nil), []
 

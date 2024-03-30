@@ -19,7 +19,7 @@ let rec print_ast_node token =
      | Nil -> "Nil"
      | Bool b -> Printf.sprintf "%b" b
      | Number n -> Printf.sprintf "%f" n
-     | String str | Identifier str -> str)
+     | String str | Identifier str -> Printf.sprintf "\"%s\"" str)
   | Grouping g -> Printf.sprintf "(Grouping %s)" (print_ast_node g)
   | Unary (op, right) -> Printf.sprintf "(%s %s)" (Tokens.token_to_string op.kind) (print_ast_node right)
   | Binary (left, op, right) -> Printf.sprintf "(%s %s %s)"  (Tokens.token_to_string op.kind) (print_ast_node left) (print_ast_node right)
