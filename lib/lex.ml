@@ -128,3 +128,11 @@ let rec print_tree_internal token_list output =
 let print_tree token_list =
   print_tree_internal (List.rev token_list) [] |> String.concat "\n"
 
+let%test "lex nothing" =
+  scan_tokens "" = []
+let%test "lex number" =
+  scan_tokens "1" = [{ kind = Tokens.Number 1.; line_no = 1; col = 1 }]
+let%test "lex string" =
+  scan_tokens "\"Hello world\"" = [{ kind = Tokens.String "Hello World"; line_no = 1; col = 12 }]
+let%test "lex groupings" =
+  scan_tokens "(1 + 2)" = []
