@@ -11,8 +11,6 @@ type context = {
 let char_to_string chars = chars |> List.rev |> List.to_seq |> String.of_seq
 
 let add_token ?(current = 1) context token =
-  Printf.printf "Current = %d; Context.current = %d; Context.start = %d\n" current context.current context.start;
-  Printf.printf "New Context.current = %d; New Context.start = %d\n" (context.current + current) context.current;
   let new_current = context.current + current in
   {line = context.line;
    current = new_current;
