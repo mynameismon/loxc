@@ -2,6 +2,8 @@
    Operator = Plus | Minus | Star, etc.
    and then make TokenType = Bracket | Operator | ...?*)
 
+open Error
+
 type token_type =
   | LeftParen
   | RightParen
@@ -42,7 +44,7 @@ type token_type =
   | String of string
   | Number of float
   | Identifier of string
-  | Error of string
+  | Error of error
 
 type token = {
     kind: token_type;
@@ -155,7 +157,7 @@ let token_to_string token =
   | String str -> Printf.sprintf "\"%s\"" str
   | Number num -> Float.to_string num
   | Identifier idf -> idf
-  | Error str -> str
+  | Error err -> Printf.sprintf "%s" (print_error err)
 
 let print_token tok =
   Printf.sprintf "(Line %d, Col %d: %s %s)" tok.line_no tok.col (token_name tok.kind) (token_to_string tok.kind)

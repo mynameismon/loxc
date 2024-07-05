@@ -1,4 +1,5 @@
 (executable
  (public_name loxc)
+ (modes byte)
  (name main)
  (libraries loxc))

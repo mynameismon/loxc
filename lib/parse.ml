@@ -8,12 +8,7 @@ let rec primary tokens =
   | { kind = Tokens.Number num; _ } :: rest -> (Literal(Number(num)), rest)
   | { kind = Tokens.Nil; _ } :: rest -> (Literal(Nil), rest)
   | { kind = Tokens.String str; _ } :: rest -> (Literal(String(str)), rest)
-  | { kind = Tokens.LeftParen; _ } :: rest ->
-     (let expr, rrest = expression rest in
-     match rrest with
-     | { kind = Tokens.RightParen; _ } :: rrrest -> (Grouping expr, rrrest)
-     | _ -> (Error "Unclosed bracket", rest))
-  | _ :: rest -> (Error("Unhandled token"), rest)
+  | { kind = _; _} :: rest -> (Error (SynError "Unhandled Token")), rest
   | [] -> Literal(Nil), []
 
 and unary tokens =

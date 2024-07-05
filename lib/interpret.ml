@@ -1,7 +1,9 @@
+open Error
+
 type result =
   | Float of float
   | Bool of bool
-  | Error of string
+  | Error of error
 
 let rec eval ast =
   match ast with
@@ -33,10 +35,10 @@ let rec eval ast =
 
     | Error(a), _, _ -> Error(a)
     | _, _, Error(a) -> Error(a)
-    | _ -> Error "Unhandled"
+    | _ -> Error (RunTimeError ("Unhandled"))
   )
   | Ast.Error err -> Error err
-  | _ -> Error "Unhandled nodes"
+  | _ -> Error (RunTimeError ("Unhandled"))
 
 let print_result res =
   match res with
@@ -46,6 +48,6 @@ let print_result res =
     | true -> "true"
     | false -> "false"
   )
-  | Error e -> e
+  | Error e -> print_error e
 
 let interpret ast = eval ast |> print_result

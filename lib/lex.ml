@@ -1,4 +1,5 @@
 open Tokens
+open Error
 
 type context = {
     line: int;
@@ -30,10 +31,10 @@ let scan_num chars context =
     | _  ->  curr_str, chars, context in
   let pre, rem, context = scan_int [] chars context in
   let post, rem, context = match rem with
-    | '.' :: '0'..'9':: t -> scan_int ('.' :: pre) t {context with current = context.current + 1;}
+    | '.' :: ('0'..'9' as digit) :: t -> scan_int ('.' :: pre) (digit :: t) {context with current = context.current + 1;}
     | _ -> pre, rem, context in
   let token = match post with
-    | '.' :: _ -> Error "Number ends with .!"
+    | '.' :: _ -> Error (LexError ("Number ends with .!"))
     | _ -> (Tokens.Number (Float.of_string (char_to_string post))) in
   let token_len = context.current - context.start in
   rem, (add_token ~current:token_len context token)
@@ -50,14 +51,14 @@ let rec scan_string curr_str chars context =
   | [] -> [], {context with current = context.current + 1;
                         start = context.current;
                         tokens = {
-                            kind = Error "String not closed!";
+                            kind = Error (LexError ("String not closed!"));
                             line_no = context.line;
                             col = context.current;} :: context.tokens}
   | '\n' :: t -> t, {line = context.line + 1;
                       current = 1;
                       start = 1;
                       tokens = {
-                          kind = Error "String not closed!";
+                          kind = Error (LexError ("String not closed!"));
                           line_no = context.line;
                           col = context.current;} :: context.tokens}
   | '"' :: t -> t, {context with current = context.current + 1;
@@ -107,7 +108,7 @@ let rec scan_token remaining context =
   | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
   | 'a'..'z' :: _ | 'A'..'Z' :: _ | '_' :: _ -> let tokens, context = (scan_identifier remaining context) in scan_token tokens context
   | ':' :: t -> scan_token t (add_token context Tokens.Colon) (* Lox Extension: Lexing for type checking *)
-  | h :: t -> scan_token t (add_token context (Error (Printf.sprintf "Unknown token %c" h)))
+  | h :: t -> scan_token t (add_token context (Error (LexError (Printf.sprintf "Unknown token %c" h))))
 
 
 let string_to_list s =
@@ -126,3 +127,4 @@ let rec print_tree_internal token_list output =
 
 let print_tree token_list =
   print_tree_internal (List.rev token_list) [] |> String.concat "\n"
+
