@@ -35,10 +35,10 @@ let rec eval ast =
 
     | Error(a), _, _ -> Error(a)
     | _, _, Error(a) -> Error(a)
-    | _ -> Error (RunTimeError ("Unhandled"))
+    | _ -> Error (RunTimeError ("Unhandled Binary Operator"))
   )
   | Ast.Error err -> Error err
-  | _ -> Error (RunTimeError ("Unhandled"))
+  | _ -> Error (RunTimeError ("Unhandled Token"))
 
 let print_result res =
   match res with
