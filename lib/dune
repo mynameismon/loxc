@@ -1,2 +1,4 @@
 (library
- (name loxc))
+ (name loxc)
+ (inline_tests)
+ (preprocess (pps ppx_inline_test)))
