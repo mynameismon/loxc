@@ -132,7 +132,22 @@ let%test "lex nothing" =
   scan_tokens "" = []
 let%test "lex number" =
   scan_tokens "1" = [{ kind = Tokens.Number 1.; line_no = 1; col = 1 }]
+let%test "lex floats" =
+  scan_tokens "1.2" = [{ kind = Tokens.Number 1.2; line_no = 1; col = 1 }]
+let%test "lex multiple numbers" =
+  scan_tokens "1 2 3" = [{ kind = Tokens.Number 1.; line_no = 1; col = 1 };
+                         { kind = Tokens.Number 2.; line_no = 1; col = 3 };
+                         { kind = Tokens.Number 3.; line_no = 1; col = 5 }]
 let%test "lex string" =
-  scan_tokens "\"Hello world\"" = [{ kind = Tokens.String "Hello World"; line_no = 1; col = 12 }]
+  scan_tokens "\"Hello world\"" = [{ kind = Tokens.String "Hello world"; line_no = 1; col = 1 }]
+let%test "incomplete string" =
+  scan_tokens "\"Hello" = [{kind = Tokens.Error (Error.LexError "String not closed!"); line_no = 1; col = 6 }]
+let%test "incomplete string newline" =
+  scan_tokens "\"Hello\n1" = [{kind = Tokens.Error (Error.LexError "String not closed!"); line_no = 1; col = 6 };
+                             {kind = Tokens.Number 1.; line_no = 2; col = 1 };]
 let%test "lex groupings" =
-  scan_tokens "(1 + 2)" = []
+  scan_tokens "(1 + 2)" = [{ kind = Tokens.LeftParen ; line_no = 1; col = 1 };
+                           { kind = Tokens.Number 1. ; line_no = 1; col = 2 };
+                           { kind = Tokens.Plus      ; line_no = 1; col = 4 };
+                           { kind = Tokens.Number 2. ; line_no = 1; col = 6 };
+                           { kind = Tokens.RightParen; line_no = 1; col = 7 };]
