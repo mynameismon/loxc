@@ -9,8 +9,8 @@ type literal =
 
 type expr =
   | Literal of literal
-  | Unary of Tokens.token * expr
-  | Binary of expr * Tokens.token * expr
+  | Unary of Tokens.token_type * expr
+  | Binary of expr * Tokens.token_type * expr
   | Grouping of expr
   | Error of error
 
@@ -24,8 +24,8 @@ let rec print_ast_node token =
      | Number n -> Printf.sprintf "%f" n
      | String str | Identifier str -> Printf.sprintf "\"%s\"" str)
   | Grouping g -> Printf.sprintf "(Grouping %s)" (print_ast_node g)
-  | Unary (op, right) -> Printf.sprintf "(%s %s)" (Tokens.token_to_string op.kind) (print_ast_node right)
-  | Binary (left, op, right) -> Printf.sprintf "(%s %s %s)"  (Tokens.token_to_string op.kind) (print_ast_node left) (print_ast_node right)
+  | Unary (op, right) -> Printf.sprintf "(%s %s)" (Tokens.token_to_string op) (print_ast_node right)
+  | Binary (left, op, right) -> Printf.sprintf "(%s %s %s)"  (Tokens.token_to_string op) (print_ast_node left) (print_ast_node right)
   | Error str -> print_error str
 
 let print_ast tokens = print_ast_node tokens

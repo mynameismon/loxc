@@ -15,7 +15,7 @@ and unary tokens =
   match tokens with
   | ({ kind = Tokens.Bang; _ } | { kind = Tokens.Minus; _ }) as op :: rest ->
      let right, rrest = primary rest in
-     (Unary(op, right), rrest)
+     (Unary(op.kind, right), rrest)
   | _ -> primary tokens
 
 and term tokens =
@@ -23,7 +23,7 @@ and term tokens =
   match rest with
   | ({ kind = Tokens.Plus; _ } | { kind = Tokens.Minus; _ }) as op :: rest ->
      let right, rrest = term rest in
-     (Binary(left, op, right), rrest)
+     (Binary(left, op.kind, right), rrest)
   | _ -> (left, rest)
 
 and factor tokens =
@@ -31,7 +31,7 @@ and factor tokens =
   match rest with
   | ({ kind = Tokens.Star; _ } | { kind = Tokens.Slash; _ }) as op :: rest ->
      let right, rrest = factor rest in
-     (Binary(left, op, right), rrest)
+     (Binary(left, op.kind, right), rrest)
   | _ -> (left, rest)
 
 and comparision tokens =
@@ -40,7 +40,7 @@ and comparision tokens =
   | ({ kind = Tokens.Greater; _ } | { kind = Tokens.GreaterEqual; _ }
     | { kind = Tokens.Less; _ }  | { kind = Tokens.LessEqual; _ } | { kind = Tokens.Equal; _ }) as op :: rest ->
      let right, rrest = comparision rest in
-     (Binary(left, op, right), rrest)
+     (Binary(left, op.kind, right), rrest)
   | _ -> (left, rest)
 
 and equality tokens =
@@ -48,7 +48,7 @@ and equality tokens =
   match rest with
   | ({ kind = Tokens.BangEqual; _ } | { kind = Tokens.EqualEqual; _ }) as op :: rest ->
      let right, rrest = equality rest in
-     (Binary(left, op, right), rrest)
+     (Binary(left, op.kind, right), rrest)
   | _ -> (left, rest)
 
 and expression tokens = equality tokens
