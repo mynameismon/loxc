@@ -11,12 +11,15 @@ type context = {
 let char_to_string chars = chars |> List.rev |> List.to_seq |> String.of_seq
 
 let add_token ?(current = 1) context token =
+  Printf.printf "Current = %d; Context.current = %d; Context.start = %d\n" current context.current context.start;
+  Printf.printf "New Context.current = %d; New Context.start = %d\n" (context.current + current) context.current;
+  let new_current = context.current + current in
   {line = context.line;
-   current = context.current + current;
-   start = context.current;
+   current = new_current;
+   start = new_current;
    tokens = {kind = token;
              line_no = context.line;
-             col = context.current} :: context.tokens}
+             col = context.start} :: context.tokens}
 
 
 (* Idea: Match as many numbers as one can. Once that is done, check if
@@ -36,7 +39,7 @@ let scan_num chars context =
   let token = match post with
     | '.' :: _ -> Error (LexError ("Number ends with .!"))
     | _ -> (Tokens.Number (Float.of_string (char_to_string post))) in
-  let token_len = context.current - context.start in
+  let token_len = context.current - context.start - 1 in
   rem, (add_token ~current:token_len context token)
 
 let rec lex_comments chars =
@@ -48,7 +51,7 @@ let rec lex_comments chars =
 (* Note: Multiline strings are not allowed because I am too lazy to figure out how to make  *)
 let rec scan_string curr_str chars context =
   match chars with
-  | [] -> [], {context with current = context.current + 1;
+  | [] -> [], {context with current = context.current;
                         start = context.current;
                         tokens = {
                             kind = Error (LexError ("String not closed!"));
@@ -62,11 +65,11 @@ let rec scan_string curr_str chars context =
                           line_no = context.line;
                           col = context.current;} :: context.tokens}
   | '"' :: t -> t, {context with current = context.current + 1;
-                        start = context.current;
+                        start = context.current + 1;
                         tokens = {
                             kind = (Tokens.String (char_to_string curr_str));
                             line_no = context.line;
-                            col = context.current;} :: context.tokens}
+                            col = context.start;} :: context.tokens}
   | c :: t -> scan_string (c :: curr_str) t {context with current = context.current + 1}
 
 let scan_identifier chars context =
@@ -85,7 +88,7 @@ let rec scan_token remaining context =
   | [] -> context
   | '\n' :: t -> scan_token t {context with line = context.line + 1; start = 1; current = 1}
   | ' ' :: t | '\t' :: t | '\r' :: t -> scan_token t
-                                           {context with start = context.current;  current = context.current + 1}
+                                           {context with start = context.current + 1;  current = context.current + 1}
   | '*' :: t -> scan_token t (add_token context Tokens.Star)
   | '+' :: t -> scan_token t (add_token context Tokens.Plus)
   | '-' :: t -> scan_token t (add_token context Tokens.Minus)
@@ -105,7 +108,7 @@ let rec scan_token remaining context =
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
   | '/' :: t -> scan_token t (add_token context Tokens.Slash)
   | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
-  | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
+  | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens {context with current = context.current + 1}
   | 'a'..'z' :: _ | 'A'..'Z' :: _ | '_' :: _ -> let tokens, context = (scan_identifier remaining context) in scan_token tokens context
   | ':' :: t -> scan_token t (add_token context Tokens.Colon) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (LexError (Printf.sprintf "Unknown token %c" h))))
