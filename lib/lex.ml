@@ -39,8 +39,7 @@ let scan_num chars context =
   let token = match post with
     | '.' :: _ -> Error (LexError ("Number ends with .!"))
     | _ -> (Tokens.Number (Float.of_string (char_to_string post))) in
-  let token_len = context.current - context.start - 1 in
-  rem, (add_token ~current:token_len context token)
+  rem, (add_token ~current:0 context token)
 
 let rec lex_comments chars =
   match chars with
@@ -108,7 +107,7 @@ let rec scan_token remaining context =
                          {context with line = context.line + 1; start = 1; current = 1}(* Handle comments gracefully *)
   | '/' :: t -> scan_token t (add_token context Tokens.Slash)
   | '"' :: t -> let tokens, context = (scan_string [] t context) in scan_token tokens context
-  | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens {context with current = context.current + 1}
+  | '0'..'9' :: _ -> let tokens, context = (scan_num remaining context) in scan_token tokens context
   | 'a'..'z' :: _ | 'A'..'Z' :: _ | '_' :: _ -> let tokens, context = (scan_identifier remaining context) in scan_token tokens context
   | ':' :: t -> scan_token t (add_token context Tokens.Colon) (* Lox Extension: Lexing for type checking *)
   | h :: t -> scan_token t (add_token context (Error (LexError (Printf.sprintf "Unknown token %c" h))))
