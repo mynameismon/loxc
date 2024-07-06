@@ -76,7 +76,7 @@ let scan_identifier chars context =
   | _ :: _ -> (char_to_string curr_str), chars, context
   | [] -> (char_to_string curr_str), chars, context in
   let identifier, chars, context = scan_word [] chars context in
-  chars, (add_token context (match_keyword identifier))
+  chars, (add_token ~current:0 context (match_keyword identifier))
 
 (* Idea: we have an implicit zipper like data structure. The current token that is being processed is held in curr.
    If the current token is recognised as a valid token, it is added to the parse tree and returned in processed *)
@@ -151,3 +151,16 @@ let%test "lex groupings" =
                            { kind = Tokens.Plus      ; line_no = 1; col = 4 };
                            { kind = Tokens.Number 2. ; line_no = 1; col = 6 };
                            { kind = Tokens.RightParen; line_no = 1; col = 7 };]
+let%test "lex keyword" =
+  scan_tokens "x and y_1 for true false" =
+    [{ kind = Tokens.Identifier "x"  ; line_no = 1; col = 1 };
+     { kind = Tokens.And             ; line_no = 1; col = 3 };
+     { kind = Tokens.Identifier "y_1"; line_no = 1; col = 7 };
+     { kind = Tokens.For             ; line_no = 1; col = 11 };
+     { kind = Tokens.True            ; line_no = 1; col = 15 };
+     { kind = Tokens.False           ; line_no = 1; col = 20 };]
+let%test "lex invalid token" =
+  scan_tokens "&*78398" =
+    [ { kind = Error (LexError "Unknown token &"); line_no = 1; col = 1 };
+      { kind = Tokens.Star; line_no = 1; col = 2 };
+      { kind = Tokens.Number 78398.; line_no = 1; col = 3}]
