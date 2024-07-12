@@ -8,7 +8,14 @@ let rec primary tokens =
   | { kind = Tokens.Number num; _ } :: rest -> (Literal(Number(num)), rest)
   | { kind = Tokens.Nil; _ } :: rest -> (Literal(Nil), rest)
   | { kind = Tokens.String str; _ } :: rest -> (Literal(String(str)), rest)
-  | { kind = _; _} :: rest -> (Error (SynError "Unhandled Token")), rest
+  | { kind = Tokens.LeftParen; _ } :: rest ->
+     (let e, rrest = expression rest in
+       match rrest with
+       | { kind = Tokens.RightParen; _ } :: rrest -> Grouping (e), rrest
+      | { kind = _ as tok; _} :: rest -> Error (SynError (Printf.sprintf "Paren - unhandled token %s" (token_to_string tok))), rest
+      | [] -> Error (SynError "Unclosed bracket!"), [])
+  | { kind = Tokens.RightParen; _ } :: rest -> Literal (Nil), rest
+  | { kind = _ as tok; _} :: rest -> (Error (SynError (Printf.sprintf "Unhandled Token %s" (token_to_string tok)))), rest
   | [] -> Literal(Nil), []
 
 and unary tokens =
