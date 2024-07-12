@@ -3,14 +3,18 @@ open Error
 type result =
   | Float of float
   | Bool of bool
+  | String of string
   | Error of error
+  | NilVal
 
 let rec eval ast =
   match ast with
-  | Ast.Literal(Number num) -> Float num
-  | Ast.Literal(Bool b) -> Bool b
-  | Ast.Grouping(g) -> eval g
-  | Ast.Binary(left, op, right) -> (
+  | Ast.Literal (Ast.Nil) -> NilVal
+  | Ast.Literal (Number num) -> Float num
+  | Ast.Literal (Bool b) -> Bool b
+  | Ast.Grouping g -> eval g
+  | Ast.Literal (String str) -> String str
+  | Ast.Binary (left, op, right) -> (
     let l = eval left
     and r = eval right in
     match (l, op, r) with
@@ -26,6 +30,8 @@ let rec eval ast =
     | Float(a), EqualEqual, Float(b) -> Bool (a = b)
     | Float(a), BangEqual, Float(b) -> Bool (a <> b)
 
+    | String a, Plus, String b -> String (a ^ b)
+
     | Bool(a), Greater, Bool(b) -> Bool (a > b)
     | Bool(a), GreaterEqual, Bool(b) -> Bool (a >= b)
     | Bool(a), Less, Bool(b) -> Bool (a < b)
@@ -36,6 +42,15 @@ let rec eval ast =
     | Error(a), _, _ -> Error(a)
     | _, _, Error(a) -> Error(a)
     | _ -> Error (RunTimeError ("Unhandled Binary Operator"))
+  )
+  | Ast.Unary (op, right) -> (
+    let r = eval right in
+    match (op, r) with
+    | Minus, Float a -> Float (0. -. a)
+    | Bang, Bool b -> Bool (not b)
+    | Error a, _ -> Error a
+    | _, Error b -> Error b
+    | _ -> Error (InternalError "Should not be reached")
   )
   | Ast.Error err -> Error err
   | _ -> Error (RunTimeError ("Unhandled Token"))
@@ -48,6 +63,8 @@ let print_result res =
     | true -> "true"
     | false -> "false"
   )
+  | String str -> str
   | Error e -> print_error e
+  | NilVal -> "Nil"
 
 let interpret ast = eval ast |> print_result
