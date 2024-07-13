@@ -6,7 +6,7 @@ type error =
 
 let print_error error =
   match error with
-  | (LexError str) -> Printf.sprintf "Lex Error: %s" str
-  | (SynError str) -> Printf.sprintf "Syntax Error: %s" str
-  | (RunTimeError str) -> Printf.sprintf "Runtime Error: %s" str
-  | (InternalError str) -> Printf.sprintf "INTERNAL ERROR!: %s" str
+  | LexError str -> Printf.sprintf "Lex Error: %s" str
+  | SynError str -> Printf.sprintf "Syntax Error: %s" str
+  | RunTimeError str -> Printf.sprintf "Runtime Error: %s" str
+  | InternalError str -> Printf.sprintf "INTERNAL ERROR!: %s" str

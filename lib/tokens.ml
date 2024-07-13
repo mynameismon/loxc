@@ -46,11 +46,7 @@ type token_type =
   | Identifier of string
   | Error of error
 
-type token = {
-    kind: token_type;
-    line_no: int;
-    col: int;
-  }
+type token = { kind : token_type; line_no : int; col : int }
 
 let match_keyword identifier =
   match identifier with
@@ -115,9 +111,8 @@ let token_name token =
   | Identifier _ -> "Identifier"
   | Error _ -> "Error"
 
-
 let token_to_string token =
-  match token with 
+  match token with
   | LeftParen -> "("
   | RightParen -> ")"
   | LeftBrace -> "{"
@@ -160,4 +155,5 @@ let token_to_string token =
   | Error err -> Printf.sprintf "%s" (print_error err)
 
 let print_token tok =
-  Printf.sprintf "(Line %d, Col %d: %s %s)" tok.line_no tok.col (token_name tok.kind) (token_to_string tok.kind)
+  Printf.sprintf "(Line %d, Col %d: %s %s)" tok.line_no tok.col
+    (token_name tok.kind) (token_to_string tok.kind)
