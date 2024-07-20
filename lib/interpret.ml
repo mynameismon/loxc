@@ -6,16 +6,17 @@ type result =
   | String of string
   | Error of error
   | NilVal
+  | Output of result
 
-let rec eval ast =
+let rec eval_expr ast =
   match ast with
   | Ast.Literal Ast.Nil -> NilVal
   | Ast.Literal (Number num) -> Float num
   | Ast.Literal (Bool b) -> Bool b
-  | Ast.Grouping g -> eval g
+  | Ast.Grouping g -> eval_expr g
   | Ast.Literal (String str) -> String str
   | Ast.Binary (left, op, right) -> (
-      let l = eval left and r = eval right in
+      let l = eval_expr left and r = eval_expr right in
       match (l, op, r) with
       | Float a, Plus, Float b -> Float (a +. b)
       | Float a, Minus, Float b -> Float (a -. b)
@@ -38,7 +39,7 @@ let rec eval ast =
       | _, _, Error a -> Error a
       | _ -> Error (RunTimeError "Unhandled Binary Operator"))
   | Ast.Unary (op, right) -> (
-      let r = eval right in
+      let r = eval_expr right in
       match (op, r) with
       | Minus, Float a -> Float (0. -. a)
       | Bang, Bool b -> Bool (not b)
@@ -48,12 +49,19 @@ let rec eval ast =
   | Ast.Error err -> Error err
   | _ -> Error (RunTimeError "Unhandled Token")
 
-let print_result res =
+let eval ast =
+  match ast with
+  | Ast.Expr expr -> eval_expr expr
+  | Ast.Print expr -> Output (eval_expr expr)
+  | Ast.Error err -> Error err
+
+let rec print_result res =
   match res with
   | Float f -> Printf.sprintf "%f" f
   | Bool b -> ( match b with true -> "true" | false -> "false")
   | String str -> str
   | Error e -> print_error e
-  | NilVal -> "Nil"
+  | NilVal -> ""
+  | Output res -> print_result res
 
-let interpret ast = eval ast |> print_result
+let interpret ast = List.map eval ast |> List.rev |> List.hd |> print_result 

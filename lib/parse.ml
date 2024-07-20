@@ -20,6 +20,7 @@ let rec primary tokens =
             rest )
       | [] -> (Error (SynError "Unclosed bracket!"), []))
   | { kind = Tokens.RightParen; _ } :: rest -> (Literal Nil, rest)
+  | { kind = Tokens.Semicolon; _ } :: _ -> (Literal Nil, tokens)
   | { kind = _ as tok; _ } :: rest ->
       ( Error
           (SynError (Printf.sprintf "Unhandled Token %s" (token_to_string tok))),
