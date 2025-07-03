@@ -101,8 +101,37 @@ and statement tokens ast =
       let rest, ast = expr_stmt tokens ast in
       statement rest ast
 
+and declaration tokens ast =
+  match tokens with
+  | { kind = Tokens.Var; _ }
+    :: { kind = Tokens.Identifier id; _ }
+    :: rest -> (
+      match rest with
+      | { kind = Tokens.Semicolon; _ } :: rest' ->
+          declaration rest' ((Ast.Var (id, (Literal Nil))) :: ast)
+      | { kind = Tokens.Equal; _ } :: rest' -> (
+          let expr, rest'' = expression rest' in
+          match rest'' with
+          | { kind = Tokens.Semicolon; _ } :: rest''' ->
+              declaration rest''' (Ast.Var (id, expr) :: ast)
+          | _ ->
+              ( [],
+                Ast.Error
+                  (SynError "Incomplete line. Did you forget the semicolon")
+                :: ast ))
+      | _ ->
+          ( [],
+            Ast.Error (SynError "Variable names should be followed by a semicolon (var x;) or an expression (var x = <expr>;)")
+            :: ast ))
+  | { kind = Tokens.Var; _ } :: _ ->
+     ([], Ast.Error (SynError "Variable name not provided after var.") :: ast)
+  | [] -> (tokens, ast)
+  | _ ->
+     let rest, ast = statement tokens ast in
+     declaration rest ast
+
 let parse tokens =
-  let _, ast = statement tokens [] in
+  let _, ast = declaration tokens [] in
   ast |> List.rev
 
 (* successful tests *)

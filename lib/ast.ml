@@ -14,7 +14,12 @@ type expr =
   | Grouping of expr
   | Error of error
 
-type stmt = Expr of expr | Print of expr | Error of error
+type stmt =
+  | Expr of expr
+  | Print of expr
+  | Var of string * expr
+  | Error of error
+
 type ast = stmt list
 
 let rec print_expr token =
@@ -38,6 +43,7 @@ let print_ast_node node =
   match node with
   | Expr expr -> Printf.sprintf "(Expr %s)" (print_expr expr)
   | Print expr -> Printf.sprintf "(Print %s)" (print_expr expr)
+  | Var (name, expr) -> Printf.sprintf "(Var %s = %s)" name (print_expr expr)
   | Error err -> print_error err
 
 let print_ast ast =

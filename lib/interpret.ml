@@ -53,6 +53,7 @@ let eval ast =
   match ast with
   | Ast.Expr expr -> eval_expr expr
   | Ast.Print expr -> Output (eval_expr expr)
+  | Ast.Var (_name, expr) -> eval_expr expr
   | Ast.Error err -> Error err
 
 let rec print_result res =
@@ -64,4 +65,4 @@ let rec print_result res =
   | NilVal -> ""
   | Output res -> print_result res
 
-let interpret ast = List.map eval ast |> List.rev |> List.hd |> print_result 
+let interpret ast = List.map eval ast |> List.rev |> List.hd |> print_result
